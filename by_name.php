@@ -45,9 +45,11 @@ while($row=mysql_fetch_array($res))
 <fieldset  >
 <legend></legend>
 
+
 <?php
 if(isset($_POST['find']))
 {
+    
     require 'config.php';
     $year= $_POST['year'];
     $gender= $_POST['gender'];
@@ -67,10 +69,46 @@ if(isset($_POST['find']))
     $rank=array();
      $i=0;
      
-    echo "<h3 >Year &nbsp No. Of Birth &nbsp Rank</h3>";
-    for($year;$year<=2013;$year++)
+     //Array Created
+     $temp=$year;
+     for($year;$year<=2013;$year++)
     {
         $yeararr[$i]=$year;
+        $table= $gender.'_'.$year;
+    
+    $qry="Select * from $table where Name='$name' ";
+    $result=@mysql_query($qry) or die(mysql_error());
+   
+    if(mysql_num_rows($result)>0)
+    {
+        $row=mysql_fetch_array($result);
+        $popularity[$i]=$row[1];
+        $rank[$i]=$row[2];
+    }
+    else
+    {        
+        $rank[$i]=0;
+        $popularity[$i]=0;
+    }
+    $i++;
+    }
+    //Graph Ploting
+     session_start();
+    $_SESSION['popularity']=$popularity;
+    $_SESSION['year']=$yeararr;
+    $_SESSION['name']=$name;
+
+
+    echo "<img src='GRAPH.php' style='alignment-adjust: central; margin-left: 25%'/>";
+
+     
+     
+    echo "<hr color=red />";
+    echo "<h3 >Year &nbsp No. Of Birth &nbsp Rank</h3>";
+    $year=$temp;
+    for($year;$year<=2013;$year++)
+    {
+       // $yeararr[$i]=$year;
     $table= $gender.'_'.$year;
     //echo $table;
     
@@ -81,21 +119,26 @@ if(isset($_POST['find']))
     if(mysql_num_rows($result)>0)
     {
         $row=mysql_fetch_array($result);
-        $popularity[$i]=$row[1];
-        $rank[$i]=$row[2];
+       // $popularity[$i]=$row[1];
+       // $rank[$i]=$row[2];
         echo "<br />&nbsp".$year."&nbsp &nbsp &nbsp &nbsp".$row[1]."&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp".$row[2];
         
     }
     else
     {
         echo "<br /> &nbsp".$year."&nbsp &nbsp &nbsp &nbsp".'0'."&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp".'0';
-        $rank[$i]=0;
-        $popularity[$i]=0;
+        //$rank[$i]=0;
+        //$popularity[$i]=0;
     }
     $i++;
     }
-    echo "<br /><br /><hr color=red /><br /><br />";
     
+    echo "<br /><br /><h3 style='text-align: left; color: red;'> * (=) means two or more name in the same rank. </h3>";
+    echo "<hr color=red /><br /><br />";
+    
+    
+    
+   // print_r($popularity);
     
     //echo "<br />".$row[0][1]." ".$row[0][1]." ";
 }
